@@ -16,18 +16,19 @@ public class SimpleEventProcessor extends Thread implements EventProcessor {
     }
 
     public void enqueue(Object event) {
-       queue.add(event);
+        queue.add(event);
     }
 
     @Override
     public void run() {
-        try {
-            if (eventListener == null)
-                return;
-            while (true)
+        if (eventListener == null)
+            return;
+        while (true) {
+            try {
                 eventListener.onEvent(queue.take());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }
