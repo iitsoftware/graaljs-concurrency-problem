@@ -46,13 +46,14 @@ forwards the received message to the event queue
 
 `java -cp target/graaljs-concurrency-problem_fat.jar Main js/eventconsumer-messaging-proxy.js`
 
-This example also fails with `IllegalStateException` due to concurrent access of the JS context. The proxy isn't even
-called. We would expect that the proxy is called before JS runtime checks occur.
+This example works. 
 
-## How to solve it
+## Solution
 
-- Introduce a switch at the `Context` to enable context locking instead of throwing `IllegalStateExceptions` to ensure 
-synchronous access. Establish a lock on `Context.enter` and release it on `Context.leave` if the switch is enabled. Let
-developers take responsibility for their actions.
-- Ensure that a `java.lang.reflect.Proxy` can be used to wrap any JS object and ensure that the `Proxy` is called before
-Graal runtime is called.
+Don't query the interfaces of the object that should be wrapped by a proxy but get the interface by `Class.forName(interfaceClass)`
+and use it to create the proxy. 
+
+Why that? Because GraalJS creates a dynamic proxy itself for any JS object that is passed to Java. This proxy calls
+`context.enter` / `context.leave`. If we create a proxy by querying the interfaces of the object, we would create a proxy
+of that proxy so GraalJS will always before us in the call stack. With the above way, we avoid that and have a direct 
+proxy. 

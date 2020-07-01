@@ -9,10 +9,10 @@ public class AsyncProxy implements java.lang.reflect.InvocationHandler {
     private Object obj;
     private EventProcessor eventProcessor;
 
-    public static Object newInstance(EventProcessor eventProcessor, Object obj) {
+    public static Object newInstance(EventProcessor eventProcessor, Class[] ifClasses, Object obj) {
         return java.lang.reflect.Proxy.newProxyInstance(
                 obj.getClass().getClassLoader(),
-                obj.getClass().getInterfaces(),
+                ifClasses,
                 new AsyncProxy(eventProcessor, obj));
     }
 
@@ -23,12 +23,7 @@ public class AsyncProxy implements java.lang.reflect.InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        System.out.println(method.getName());
-        if (method.getName().equals("apply")) {
-            System.out.println("enqueue messaging event");
-            eventProcessor.enqueue(args[0]);
-        } else
-            return method.invoke(obj, args);
+        eventProcessor.enqueue(args[0]);
         return null;
     }
 }

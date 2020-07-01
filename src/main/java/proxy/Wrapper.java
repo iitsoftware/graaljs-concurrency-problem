@@ -9,7 +9,12 @@ public class Wrapper {
         this.eventProcessor = eventProcessor;
     }
 
-    public Object wrap(Object obj) {
-        return AsyncProxy.newInstance(eventProcessor, obj);
+    public Object wrap(String interfaceClassName, Object obj) {
+        try {
+            Class clazz = Class.forName(interfaceClassName);
+            return AsyncProxy.newInstance(eventProcessor, new Class[]{clazz}, obj);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
