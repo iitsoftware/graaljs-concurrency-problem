@@ -8,28 +8,41 @@ public class AsyncProxy implements java.lang.reflect.InvocationHandler {
 
     private Object obj;
     private EventProcessor eventProcessor;
-    private String ifMethod;
+    private int hashcode;
+    private String toString;
 
-    public static Object newInstance(EventProcessor eventProcessor, Class[] ifClasses, Object obj, String ifMethod) {
+    public static Object newInstance(EventProcessor eventProcessor, Class[] ifClasses, Object obj) {
         return java.lang.reflect.Proxy.newProxyInstance(
                 obj.getClass().getClassLoader(),
                 ifClasses,
-                new AsyncProxy(eventProcessor, obj, ifMethod));
+                new AsyncProxy(eventProcessor, obj));
     }
 
-    private AsyncProxy(EventProcessor eventProcessor, Object obj, String ifMethod) {
+    private AsyncProxy(EventProcessor eventProcessor, Object obj) {
         this.eventProcessor = eventProcessor;
         this.obj = obj;
-        this.ifMethod = ifMethod;
+        this.hashcode = obj.hashCode();
+        this.toString = obj.toString();
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Object result = null;
-        if (method.getName().equals(ifMethod))
-            eventProcessor.enqueue(args[0]);
-        else
-            result = method.invoke(obj, args);
-        return result;
+        eventProcessor.enqueue(args[0]);
+        return null;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashcode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj.equals(this.obj);
+    }
+
+    @Override
+    public String toString() {
+        return toString;
     }
 }

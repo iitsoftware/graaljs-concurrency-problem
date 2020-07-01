@@ -51,9 +51,4 @@ This example works.
 ## Solution
 
 Don't query the interfaces of the object that should be wrapped by a proxy but get the interface by `Class.forName(interfaceClass)`
-and use it to create the proxy. 
-
-Why that? Because GraalJS creates a dynamic proxy itself for any JS object that is passed to Java. This proxy calls
-`context.enter` / `context.leave`. If we create a proxy by querying the interfaces of the object, we would create a proxy
-of that proxy so GraalJS will always before us in the call stack. With the above way, we avoid that and have a direct 
-proxy. 
+and use it to create the proxy. This removes the polyglot context out of the call stack.
